@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container mt-2">
+    <h4>Search Job</h4>
+    <hr>
+    <form id="myForm" method="get" action="{% url 'search' %}">
+        <div class="row">
+            <div class="col-10">{{ search_form }}</div>
+            <div class="col-2">
+                <button type="submit" class="btn btn-primary">Search</button>
+                <button type="button" class="btn btn-primary" onclick="addClicked()">Add</button>
+            </div>
+        </div>
+
+        {% if jobSearched %}
+        <div class="row">
+            <div class="col-10 mt-3">
+                <table class="table table-striped table-hover">
+                    <tr><b>
+                        <td><b>Job Name</b></td>
+                        <td><b>Job Size</b></td>
+                        <td><b>Date</b></td>
+                        <td></td>
+                        <td></td>
+                    </b></tr>
+                    {% for object in jobSearched %}
+                            <tr>
+                                <td>{{object.Job_Name}}</td>
+                                <td>{{object.Job_Size}}</td>
+                                <td>{{object.Date|date:'d M Y'}}</td>
+                                <td align="right">
+                                    <a href="{% url 'update_job' object.id%}">Update</a>
+                                </td>
+                                <td align="right">
+                                    <a href="{% url 'tota_cost' object.id%}">Total Cost</a>
+                                </td>
+                            </tr>
+                                <!-- Update Button -->
+                                <!-- Get Cost Button -->
+                    {% endfor %}
+                    </table>
+                {% else %}
+                    <p>No results found.</p>
+                {% endif %}
+            
+            </div>
+        </div>
+        
+    </form>
+
+    
+</div>
+
+<script>
+    function addClicked() {
+        document.getElementById("myForm").action = "{% url 'add_job' %}";
+        document.getElementById("myForm").submit();
+    }
+</script>
+
+{% endblock %}

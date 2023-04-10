@@ -1,166 +1,245 @@
-from django.shortcuts import render
+from django.shortcuts import render,redirect
 import json 
 import os
 from django.conf import settings
 from .models import Costing
-
+from .forms import *
+from django.http import HttpResponseRedirect
+import ast
+import numpy as np
+from django import forms
+from decimal import Decimal
+from django.forms.models import model_to_dict
+from django.http import JsonResponse
 
 # Create your views here.
 
-def index(request):
-    Zipper_Rate = floatConvert(179)
-    printing = []
-    printing_file = os.path.join(settings.BASE_DIR, 'printing.json')
-    with open(printing_file, 'r') as json_file:
+def search(request):
+    searchValue = request.GET.get('search_query')
+    if searchValue:
+        jobSearched = Costing.objects.filter(Job_Name__icontains=searchValue)
+    else:
+        jobSearched = Costing.objects.all().order_by('-Date')[:10]
+    context = {
+        'jobSearched':jobSearched,
+        'search_form': SearchForm()
+    }
 
-        data = json.load(json_file)
+    return render(request, 'costing/search.html', context)
 
-        for k,v in data.items():
-            printing.append({'name': k, 'value': v})
-
-    lamination = []
-    lamination_file = os.path.join(settings.BASE_DIR, 'lamination.json')
-    with open(lamination_file, 'r') as json_file:
-
-        data = json.load(json_file)
-
-        for k,v in data.items():
-            lamination.append({'name': k, 'value': v})
+def add(request):
     if request.method == 'GET':
-        return render(request, 'costing/index.html', {'printing': printing, 'lamination': lamination})
+        context = {
+        'basicJobForm': basicJobElementForm,
+        'printingForm': printingForm,
+        'laminationForm': laminationForm,
+        'otherElementsForm': otherElementForm,
+        'printingDynamicFields': printingDynamicFields,
+        'laminationDynamicFields': laminationDynamicFields
+        }
+        return render(request, 'costing/add.html',context)
     
     if request.method == 'POST':
-
         form_value = request.POST.copy()
 
-        # ********************** Saving Lamination information ************************
-        Lamination_OutPut_Polly = Lamination_Output = Lamination_Cost_Polly = Lamination_Cost = Met_Qty = Met_Rate = Met_Cost = Met_CPP_Qty = Met_CPP_Rate = Met_CPP_Cost = Foil_9_Mic_Qty = Foil_9_Mic_Rate = Foil_9_Mic_Cost = Foil_30_Mic_Qty  = Foil_30_Mic_Rate = Foil_30_Mic_Cost = Polly_Qty = Polly_Rate = Polly_Cost = 0
-        laminationFormValue = form_value.getlist('lamination')
-        laminationCostValues = form_value.getlist('Lamination Cost')
-        laminationOutputValues = form_value.getlist('Lamination Output')
-        if(laminationFormValue != 'Choose Lamination...'):
-            print(laminationFormValue)
-            for i in range(0, len(laminationFormValue)):
-                if laminationFormValue[i] == 'MET':
-                    Met_Qty = form_value.get(laminationFormValue[i])
-                    Met_Rate = [lamination[i]['value'] for i in range(0,len(lamination)) if lamination[i]['name'] == 'MET'][0]
-                    Met_Cost = floatConvert(Met_Qty)*floatConvert(Met_Rate)
-                    Lamination_Cost = floatConvert(laminationCostValues[i])
-                    Lamination_Output = floatConvert(laminationOutputValues[i])
-                elif laminationFormValue[i] == 'MET CPP':
-                    Met_CPP_Qty = form_value.get(laminationFormValue[i])
-                    Met_CPP_Rate = [lamination[i]['value'] for i in range(0,len(lamination)) if lamination[i]['name'] == 'MET CPP'][0]
-                    Met_CPP_Cost = floatConvert(Met_CPP_Qty)*floatConvert(Met_CPP_Rate)
-                    Lamination_Cost = floatConvert(laminationCostValues[i])
-                    Lamination_Output = floatConvert(laminationOutputValues[i])
-                elif laminationFormValue[i] == 'FOIL 9 MIC':
-                    Foil_9_Mic_Qty = form_value.get(laminationFormValue[i])
-                    Foil_9_Mic_Rate = [lamination[i]['value'] for i in range(0,len(lamination)) if lamination[i]['name'] == 'FOIL 9 MIC'][0]
-                    Foil_9_Mic_Cost = floatConvert(Foil_9_Mic_Qty)*floatConvert(Foil_9_Mic_Rate)
-                    Lamination_Cost = floatConvert(laminationCostValues[i])
-                    Lamination_Output = floatConvert(laminationOutputValues[i])
-                elif laminationFormValue[i] == 'FOIL 30 MIC':
-                    Foil_30_Mic_Qty = form_value.get(laminationFormValue[i])
-                    Foil_30_Mic_Rate = [lamination[i]['value'] for i in range(0,len(lamination)) if lamination[i]['name'] == 'FOIL 30 MIC'][0]
-                    Foil_30_Mic_Cost = floatConvert(Foil_30_Mic_Qty)*floatConvert(Foil_30_Mic_Rate)
-                    Lamination_Cost = floatConvert(laminationCostValues[i])
-                    Lamination_Output = floatConvert(laminationOutputValues[i])
-                elif laminationFormValue[i] == 'Poly':
-                    Polly_Qty = form_value.get(laminationFormValue[i])
-                    Polly_Rate = [lamination[i]['value'] for i in range(0,len(lamination)) if lamination[i]['name'] == 'Poly'][0]
-                    Polly_Cost = floatConvert(Polly_Qty)*floatConvert(Polly_Rate)
-                    Lamination_Cost_Polly = floatConvert(laminationCostValues[i])
-                    Lamination_OutPut_Polly = floatConvert(laminationOutputValues[i])
+        printing_objects = Printing.objects.all()
+        lamination_objects = Lamination.objects.all()
 
-        # ********************** Saving Printing information ************************
-        Pet_Qty = Lamination_Cost_PKG_Polly = Lamination_Cost_PKG = Coating_Cost_PKG = Pet_HST_Qty = Met_Qty = Pet_Rate = Ink_Cost = Met_Cost = Pet_HST_Rate = Met_Rate = Pet_Cost = Pet_HST_Cost = 0
-        printingFormValue = form_value.get('printing')
-        if(printingFormValue != 'Choose Printing...'):
-            if printingFormValue == 'PET':
-                Pet_Qty = floatConvert(form_value.get(printingFormValue))
-                Pet_Rate = [printing[i]['value'] for i in range(0,len(printing)) if printing[i]['name'] == 'PET'][0]
-                Pet_Cost = floatConvert(Pet_Qty)*floatConvert(Pet_Rate)
-                Ink_Cost = floatConvert(form_value.get('INK COST P.KG'))*floatConvert(Pet_Qty)
-                Coating_Cost_PKG = floatConvert(form_value.get('Coating Cost'))/floatConvert(Pet_Qty)
-                Lamination_Cost_PKG = Lamination_Cost/Pet_Qty
-                Lamination_Cost_PKG_Polly = Lamination_Cost_Polly/Pet_Qty
-            elif printingFormValue == 'PET HST':
-                Pet_HST_Qty = floatConvert(form_value.get(printingFormValue))
-                Pet_HST_Rate = [printing[i]['value'] for i in range(0,len(printing)) if printing[i]['name'] == 'PET HST'][0]
-                Pet_HST_Cost = floatConvert(Pet_HST_Qty)*floatConvert(Pet_HST_Rate)
-                Ink_Cost = floatConvert(form_value.get('INK COST P.KG'))*floatConvert(Pet_HST_Qty)
-                Coating_Cost_PKG = floatConvert(form_value.get('Coating Cost'))/floatConvert(Pet_HST_Qty)
-                Lamination_Cost_PKG = Lamination_Cost/Pet_HST_Qty
-                Lamination_Cost_PKG_Polly = Lamination_Cost_Polly/Pet_HST_Qty
-            else:
-                Met_Qty = floatConvert(form_value.get(printingFormValue))
-                Met_Rate = [printing[i]['value'] for i in range(0,len(printing)) if printing[i]['name'] == 'MET'][0]
-                Met_Cost = floatConvert(Met_Qty)*floatConvert(Met_Rate)
-                Ink_Cost = floatConvert(form_value.get('INK COST P.KG'))*floatConvert(Met_Qty)
-                Coating_Cost_PKG = floatConvert(form_value.get('Coating Cost'))/floatConvert(Met_Qty)
-                Lamination_Cost_PKG = Lamination_Cost/Met_CPP_Qty
-                Lamination_Cost_PKG_Polly = Lamination_Cost_Polly/Met_Qty
+        laminationFormValue = form_value.getlist('Lamination_Type')
 
-        print(form_value)
+        formOfBasicJobElements = basicJobElementForm(request.POST)
+        formOfPrinting = printingForm(request.POST)
+        formOfLaminaiton = laminationForm(request.POST)
+        formOfPrintingDynamicElements = printingDynamicFields(request.POST)
+        formOfLaminaitonDynamicElements = laminationDynamicFields(request.POST)
+        formOfOtherElements = otherElementForm(request.POST)
+
+        costing_instance = saveJobCostData(form_value, formOfBasicJobElements, formOfPrinting, formOfLaminaiton, formOfPrintingDynamicElements, formOfLaminaitonDynamicElements, formOfOtherElements)
         
-        Total_Cost = Pet_Cost + Pet_HST_Cost + Ink_Cost + Met_Cost + Met_CPP_Cost + Foil_9_Mic_Cost + Foil_30_Mic_Cost + Lamination_Cost + Lamination_Cost_Polly + Polly_Cost + (floatConvert(form_value.get('Coating Cost'),)) + (Zipper_Rate * floatConvert(form_value.get('Zipper Qty')))
-        Net_Raw_Material = floatConvert(Pet_Qty) + floatConvert(Pet_HST_Qty) + floatConvert(Met_Qty) + floatConvert(Met_CPP_Qty) + floatConvert(Foil_9_Mic_Qty) + floatConvert(Foil_30_Mic_Qty) + floatConvert(Polly_Qty) + [floatConvert(form_value.get('Zipper Qty')) if form_value.get('Zipper Qty') != '' else 0][0]
-        costing = Costing.objects.create(
-            Job_Name = form_value.get('Job Name'),
-            Job_Size = (form_value.get('Job Size')),
-            Pet_Qty = Pet_Qty,
-            Pet_Rate = Pet_Rate,
-            Pet_Cost = Pet_Cost,
-            Pet_HST_Qty = Pet_HST_Qty,
-            Pet_HST_Rate = Pet_HST_Rate,
-            Pet_HST_Cost = Pet_HST_Cost,
-            Ink_Cost = Ink_Cost,
-            Ink_Cost_PKG = floatConvert(form_value.get('INK COST P.KG')),
-            Met_Qty  = Met_Qty ,
-            Met_Rate = Met_Rate,
-            Met_Cost = Met_Cost,
-            Met_CPP_Qty  = Met_CPP_Qty ,
-            Met_CPP_Rate = Met_CPP_Rate,
-            Met_CPP_Cost = Met_CPP_Cost,
-            Foil_9_Mic_Qty  = Foil_9_Mic_Qty ,
-            Foil_9_Mic_Rate = Foil_9_Mic_Rate,
-            Foil_9_Mic_Cost = Foil_9_Mic_Cost,
-            Foil_30_Mic_Qty  = Foil_30_Mic_Qty ,
-            Foil_30_Mic_Rate = Foil_30_Mic_Rate,
-            Foil_30_Mic_Cost = Foil_30_Mic_Cost,
-            Lamination_Cost = Lamination_Cost,
-            Lamination_Cost_PKG = Lamination_Cost_PKG,
-            Lamination_Output = Lamination_Output,
-            Polly_Qty  = Polly_Qty ,
-            Polly_Rate = Polly_Rate,
-            Polly_Cost = Polly_Cost,
-            Lamination_Cost_Polly = Lamination_Cost_Polly,
-            Lamination_Cost_PKG_Polly = Lamination_Cost_PKG_Polly,
-            Lamination_OutPut_Polly = Lamination_OutPut_Polly,
-            Coating_Cost = floatConvert(form_value.get('Coating Cost')),
-            Coating_Cost_PKG = Coating_Cost_PKG,
-            Zipper_Qty = floatConvert(form_value.get('Zipper Qty')),
-            Zipper_Rate = Zipper_Rate,
-            Zipper_Cost = Zipper_Rate * floatConvert(form_value.get('Zipper Qty')),
-            Total_Cost = Total_Cost,
-            Lami_total_Output = Lamination_OutPut_Polly,
-            Sliting_Output = floatConvert(form_value.get('Sliting Output')),
-            Print_Westag = floatConvert(Pet_Qty) - floatConvert(Met_Qty),
-            Lamination_Westag = floatConvert(Lamination_OutPut_Polly) - floatConvert(form_value.get('Sliting Output')) - floatConvert(form_value.get('Trim Wastage')),
-            Trim_Westag = floatConvert(form_value.get('Trim Wastage')),
-            Pouch_Westag = floatConvert(form_value.get('Sliting Output')) - floatConvert(form_value.get('Zipper Qty')) - floatConvert(form_value.get('Finished Goods')),
-            Net_Raw_Material = Net_Raw_Material,
-            Finished_Good = floatConvert(form_value.get('Finished Goods')),
-            Wet_Gain_Loss = floatConvert(form_value.get('Finished Goods')) - Net_Raw_Material,
-            Total_Cost_PKG = Total_Cost/floatConvert(form_value.get('Finished Goods'))
-            )
-        print(costing.Total_Cost_PKG)
+        costing_instance.Lamination_Type = str(laminationFormValue)
+        
+        for printing_object in printing_objects:
+            printing_type = printing_object.Printing_Sheet.replace(' ','_') + "_Rate"
+            setattr(costing_instance, printing_type, printing_object.Rate)
+
+        for lamination_object in lamination_objects:
+            lamination_type = lamination_object.Lamination_Sheet.replace(' ','_') + "_Rate"
+            setattr(costing_instance, lamination_type, lamination_object.Rate)
+
+        costing_instance.save()
+        return redirect('/costing')
     
+
+def update_job(request,job_id):
+    costing = Costing.objects.get(pk=job_id)
+
+    lamination_type_str = costing.Lamination_Type
+    laminationTypesList = None
+    if(lamination_type_str): 
+        laminationTypesList = ast.literal_eval(lamination_type_str) if lamination_type_str != "['']" else []
+
+
+    if request.method == 'POST':
+        form_value = request.POST.copy()
+        for key in form_value.keys():
+            form_value.setlist(key, [value for value in form_value.getlist(key) if value])
+
+        laminationFormValue = form_value.getlist('Lamination_Type')
+
+        formOfBasicJobElements = basicJobElementForm(form_value, instance=costing)
+        formOfPrinting = printingForm(form_value, instance=costing)
+        formOfLaminaiton = laminationForm(form_value, instance=costing)
+        formOfPrintingDynamicElements = printingDynamicFields(form_value, instance=costing)
+        formOfLaminaitonDynamicElements = laminationDynamicFields(form_value, instance=costing)
+        formOfOtherElements = otherElementForm(form_value, instance=costing)
+        if formOfBasicJobElements.is_valid() and formOfPrinting.is_valid() and formOfLaminaiton.is_valid() and formOfOtherElements.is_valid() and formOfLaminaitonDynamicElements.is_valid() and formOfPrintingDynamicElements.is_valid():
+            formOfBasicJobElements.save()
+            formOfPrinting.save()
+            formOfLaminaiton.save()
+            formOfPrintingDynamicElements.save()
+            formOfLaminaitonDynamicElements.save()
+            formOfOtherElements.save()
+            costing = calculateCostOfJob(costing, laminationTypesList)
+            costing.Lamination_Type = str(laminationFormValue)
+            costing.save()
+            return redirect('/costing')
+        
+        # call function that populates other values as well
+        # this functino will be common for adding new job cost and updating existing one
+    else:
+        
+        formOfBasicJobElements = basicJobElementForm(instance=costing)
+        formOfPrinting = printingForm(instance=costing)
+        formOfLaminaiton = laminationForm(instance=costing)
+        formOfPrintingDynamicElements = printingDynamicFields(instance=costing)
+        formOfLaminaitonDynamicElements = laminationDynamicFields(instance = costing)
+        formOfOtherElements = otherElementForm(instance=costing)
+
+
+        context = {
+            'basicJobForm': formOfBasicJobElements,
+            'printingForm': formOfPrinting,
+            'laminationForm': formOfLaminaiton,
+            'otherElementsForm': formOfOtherElements,
+            'printingDynamicFields': formOfPrintingDynamicElements,
+            'laminationDynamicFields': formOfLaminaitonDynamicElements,
+            'laminationTypesList': laminationTypesList
+        }
+        return render(request, 'costing/update.html', context)
+
+def total_cost(request, job_id):
+    costing = Costing.objects.get(pk=job_id)
     context = {
         'calculated_cost': costing
     }
     return render(request, 'costing/totalCost.html', context)
 
+
 def floatConvert(value):
-        return [float(value) if value != '' else 0][0]
+        return None if value == '' or value is None else float(value)
+
+
+
         
+def saveJobCostData(form_value, formOfBasicJobElements, formOfPrinting, formOfLaminaiton, formOfPrintingDynamicElements, formOfLaminaitonDynamicElements, formOfOtherElements):
+    if formOfBasicJobElements.is_valid() and formOfPrinting.is_valid() and formOfLaminaiton.is_valid() and formOfPrintingDynamicElements.is_valid() and formOfLaminaitonDynamicElements.is_valid() and formOfOtherElements.is_valid():
+            
+            costing_instance = Costing()
+        
+            # set the relevant fields from the forms on the Costing instance
+            costing_instance.Date = formOfBasicJobElements.cleaned_data['Date']
+            costing_instance.Job_Name = formOfBasicJobElements.cleaned_data['Job_Name']
+            costing_instance.Job_Size = formOfBasicJobElements.cleaned_data['Job_Size']
+
+            costing_instance.Printing_Type = formOfPrinting.cleaned_data['Printing_Type']
+            
+            costing_instance.Pet_Qty = formOfPrintingDynamicElements.cleaned_data['Pet_Qty']
+            costing_instance.Pet_HST_Qty = formOfPrintingDynamicElements.cleaned_data['Pet_HST_Qty']
+            costing_instance.Met_Qty = formOfPrintingDynamicElements.cleaned_data['Met_Qty']
+            costing_instance.Poly_Qty = formOfPrintingDynamicElements.cleaned_data['Poly_Qty']
+            costing_instance.Ink_Cost_PKG = formOfPrintingDynamicElements.cleaned_data['Ink_Cost_PKG']
+
+            costing_instance.Lamination_Type = form_value.getlist('Lamination_Type')   
+
+            costing_instance.Met_Qty = formOfLaminaitonDynamicElements.cleaned_data['Met_Qty']
+            costing_instance.Met_CPP_Qty = formOfLaminaitonDynamicElements.cleaned_data['Met_CPP_Qty']
+            costing_instance.Foil_9_Mic_Qty = formOfLaminaitonDynamicElements.cleaned_data['Foil_9_Mic_Qty']
+            costing_instance.Foil_30_Mic_Qty = formOfLaminaitonDynamicElements.cleaned_data['Foil_30_Mic_Qty']
+            costing_instance.Polly_Qty = formOfLaminaitonDynamicElements.cleaned_data['Polly_Qty']
+            costing_instance.Lamination_Cost = formOfLaminaitonDynamicElements.cleaned_data['Lamination_Cost']
+            costing_instance.Lamination_Output = formOfLaminaitonDynamicElements.cleaned_data['Lamination_Output']
+            costing_instance.Lamination_Cost_Polly = formOfLaminaitonDynamicElements.cleaned_data['Lamination_Cost_Polly']
+            costing_instance.Lamination_OutPut_Polly = formOfLaminaitonDynamicElements.cleaned_data['Lamination_OutPut_Polly']
+            
+            costing_instance.Zipper_Qty = formOfOtherElements.cleaned_data['Zipper_Qty']
+            costing_instance.Coating_Cost = formOfOtherElements.cleaned_data['Coating_Cost']
+            costing_instance.Sliting_Output = formOfOtherElements.cleaned_data['Sliting_Output']
+            costing_instance.Trim_Westag = formOfOtherElements.cleaned_data['Trim_Westag']
+            costing_instance.Finished_Good = formOfOtherElements.cleaned_data['Finished_Good']
+            
+            # save the Costing instance to the database
+            return costing_instance
+    
+def calculateCostOfJob(costing_instance, laminationType):
+    costing_instance.Pet_Cost = multiply([costing_instance.Pet_Qty, costing_instance.Pet_Rate])
+    costing_instance.Pet_HST_Cost = multiply([costing_instance.Pet_HST_Qty, costing_instance.Pet_HST_Rate])
+    costing_instance.Poly_Cost = multiply([costing_instance.Poly_Qty, costing_instance.Poly_Rate])
+    costing_instance.Met_Cost = multiply([costing_instance.Met_Qty, costing_instance.Met_Rate])
+    costing_instance.Met_CPP_Cost = multiply([costing_instance.Met_CPP_Qty, costing_instance.Met_CPP_Rate])
+    costing_instance.Foil_9_Mic_Cost = multiply([costing_instance.Foil_9_Mic_Qty, costing_instance.Foil_9_Mic_Rate])
+    costing_instance.Foil_30_Mic_Cost = multiply([costing_instance.Foil_30_Mic_Qty, costing_instance.Foil_30_Mic_Rate])
+    costing_instance.Polly_Cost = multiply([costing_instance.Polly_Qty, costing_instance.Polly_Rate])
+
+    if(costing_instance.Printing_Type):
+        printing_type = costing_instance.Printing_Type.replace(' ','_') + "_Qty"
+        costing_instance.Ink_Cost = multiply([getattr(costing_instance, printing_type), costing_instance.Ink_Cost_PKG])
+
+        if(laminationType):
+            for item in laminationType:
+                lamination_type = item.replace(' ','_') + "_Qty"
+                if item == 'Polly':
+                    costing_instance.Lamination_Cost_PKG_Polly = divide(costing_instance.Lamination_Cost_Polly, getattr(costing_instance, printing_type))
+                else:
+                    costing_instance.Lamination_Cost_PKG_Polly = divide(costing_instance.Lamination_Cost, getattr(costing_instance, printing_type))
+                    costing_instance.Print_Westag = subtractListElements([getattr(costing_instance, printing_type), getattr(costing_instance, lamination_type)])
+
+    costing_instance.Coating_Cost_PKG = divide(costing_instance.Coating_Cost,costing_instance.Lamination_Output)
+
+    costing_instance.Zipper_Rate = 179
+    costing_instance.Zipper_Cost = multiply([costing_instance.Zipper_Qty, costing_instance.Zipper_Rate])
+
+    totalCostParameters = [costing_instance.Pet_Cost , costing_instance.Pet_HST_Cost , costing_instance.Ink_Cost , costing_instance.Poly_Cost, costing_instance.Met_Cost , costing_instance.Met_CPP_Cost , costing_instance.Foil_9_Mic_Cost , costing_instance.Foil_30_Mic_Cost , costing_instance.Lamination_Cost , costing_instance.Lamination_Cost_Polly , costing_instance.Polly_Cost , costing_instance.Coating_Cost , costing_instance.Zipper_Cost]
+    costing_instance.Total_Cost = sum(listNoneFilter(totalCostParameters)) if totalCostParameters else None
+
+    costing_instance.Lamination_Westag = subtractListElements([costing_instance.Lami_total_Output,  sum(listNoneFilter([costing_instance.Sliting_Output, costing_instance.Trim_Westag]))])
+
+    costing_instance.Pouch_Westag = subtractListElements([sum(listNoneFilter([costing_instance.Sliting_Output, costing_instance.Zipper_Qty])), costing_instance.Finished_Good])
+
+    costing_instance.Net_Raw_Material = sum(listNoneFilter([costing_instance.Pet_Qty, costing_instance.Pet_HST_Qty,costing_instance. Met_Qty, costing_instance.Met_CPP_Qty, costing_instance.Foil_9_Mic_Qty, costing_instance.Foil_30_Mic_Qty, costing_instance.Polly_Qty, costing_instance.Zipper_Qty]))
+    
+    costing_instance.Wet_Gain_Loss = subtractListElements([costing_instance.Finished_Good, costing_instance.Net_Raw_Material])
+
+    costing_instance.Total_Cost_PKG = divide(costing_instance.Total_Cost, costing_instance.Finished_Good)
+
+    return costing_instance
+
+def listNoneFilter(my_list):
+    return [float(value) if value and value != '' else 0 for value in my_list]
+
+def subtractListElements(lst):
+    result = Decimal(0)
+    for item in lst:
+        if item is not None:
+            result -= Decimal(item)
+    return result
+
+def multiply(list):
+    filteredList = listNoneFilter(list)
+    value = np.prod(filteredList) if filteredList else None
+    return value
+
+def divide(num, denom):
+    if num is not None and denom is not None and denom is not float(0):
+        return Decimal(num)/Decimal(denom)
+    else:
+        return None

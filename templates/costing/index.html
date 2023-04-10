@@ -2,10 +2,10 @@
 {% load static %}
 {% block content %}
 
-<div class="container mt-3">
+<div class="container mt-2">
     {% include 'partials/_message.html' %}
 
-    <form action="{% url 'costing' %}" method="post">
+    <form action="{% url 'calculate_cost' %}" method="post">
         {% csrf_token %}
         <h4><b>Calculate Job Cost</b></h4>
         <hr>
@@ -90,7 +90,7 @@
 <script>
     var contextLamination = "{{lamination|safe}}";
 </script>
-<script src="{% static 'js/costing.js' %}"></script>
+<script src="{% static 'js/costing/costing.js' %}"></script>
 
 
 

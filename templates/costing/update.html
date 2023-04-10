@@ -1,0 +1,92 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h4>Update Job</h4>
+    <hr>
+    {% if submitted %}
+        Costing submitted successfully!
+    {% else %}
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="row">
+                {% for field in basicJobForm %}
+                    <div class="col">
+                        {{field}}
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="row">
+                <div class="col">
+                    Printing
+                    {{printingForm.Printing_Type}}
+                    <div id="dynamicFieldsPrinting">
+                        {{printingDynamicFields.as_p}}
+                        {{inkCost.as_p}}
+                    </div>
+                    
+                </div>
+                <div class="col">
+                    Lamination
+                            {% if laminationTypesList%}
+                                {% for item in laminationTypesList %}
+                                    <select name="{{ laminationForm.Lamination_Type.name }}" class="form-control mb-3" id="laminationAlreadyPresent">
+                                        <option value="{{ item }}" {% if item == laminationForm.Lamination_Type.value %}selected{% endif %}>
+                                            {{ item }}
+                                        </option>
+                                        {% for option in laminationForm.Lamination_Type.field.choices %}
+                                            {% if item != option.0 %}
+                                                <option value="{{ option.0 }}" {% if option.0 == laminationForm.Lamination_Type.value %}selected{% endif %}>
+                                                    {{ option.1 }}
+                                                </option>
+                                            {% endif %}
+                                        {% endfor %}
+                                    </select>
+                                    <div id="dynamicFieldsLamination{{ forloop.counter }}" data-lamination-type="{{ item }}">
+                                        {{ laminationDynamicFields.as_p }}
+                                    </div>
+                                {% endfor %}
+                                <div class="dropdown-section" id="dynamicFieldsLamination" style="display: none;">
+                                    {{laminationForm.Lamination_Type}}
+                                    {{laminationDynamicFields.as_p}}
+                                </div>
+                                <a href="#" id="add-dropdown">Add another dropdown</a>
+                            {% else %}
+                                {% block dropdown_section %}
+                                    
+                                    <div class="dropdown-section" id="dynamicFieldsLamination">
+                                        {{laminationForm.Lamination_Type}}
+                                        {{laminationDynamicFields.as_p}}
+                                    </div>
+                                    <a href="#" id="add-dropdown">Add another dropdown</a>
+                                {% endblock %}
+                        
+                            {% endif %}
+                            
+                            
+                                    
+                </div>
+            
+            </div>
+
+            <div class="row">
+                {% for field in otherElementsForm %}
+                    <div class="col">
+                        {{field}}
+                    </div>
+                {% endfor %}
+            </div>
+            
+            <input type="submit" value="Submit" class="btn btn-primary">
+
+        </form>
+        
+    {% endif %}
+    
+</div>
+
+<script src="{% static 'js/costing/updateCosting.js' %}"></script>
+
+
+{% endblock %}

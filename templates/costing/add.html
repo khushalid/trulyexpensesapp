@@ -1,0 +1,195 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<div class="container">
+    <h4>Add New Job</h4>
+    <hr>
+    <form action="" method="post">
+        {% csrf_token %}
+        <div class="row">
+            {% for field in basicJobForm %}
+                <div class="col">
+                    {% if field.label_tag.attrs.style != "display: none;" %}
+                        {{ field.label_tag }}
+                    {% endif %}
+                    {{field}}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <div class="row">
+            <div class="col">
+                Printing
+                {{printingForm.Printing_Type}}
+                <div id="dynamicFieldsPrinting">
+                    {{printingDynamicFields.as_p}}
+                    {{inkCost.as_p}}
+                </div>
+                
+            </div>
+
+            <!-- Lamination Column -->
+            <div class="col">
+                Lamination
+                {% block dropdown_section %}
+                    <div class="dropdown-section" id="dynamicFieldsLamination">
+                        {{laminationForm.Lamination_Type}}
+                        {{laminationDynamicFields.as_p}}
+                    </div>
+                    <a href="#" id="add-dropdown">Add another dropdown</a>
+                {% endblock %}
+            </div>
+        </div>
+
+        <!-- Other Elements Row -->
+        <div class="row mt-5">
+            {% for field in otherElementsForm %}
+                <div class="col">
+                    {% if field.label %}
+                        {{field.label}}
+                    {% endif %}
+                    {{field}}
+                </div>
+            {% endfor %}
+        </div>
+        
+        <input class="btn btn-primary" type="submit" value="save"/>
+
+    </form>
+</div>
+
+<script src="{% static 'js/costing/addCosting.js' %}"></script>
+{% endblock %}
+
+
+
+
+
+<div class="row">
+    <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
+      <!-- Card -->
+      <a class="card card-hover-shadow h-100" href="#">
+        <div class="card-body">
+          <h6 class="card-subtitle">Total Users</h6>
+
+          <div class="row align-items-center gx-2 mb-1">
+            <div class="col-6">
+              <h2 class="card-title text-inherit">72,540</h2>
+            </div>
+            <!-- End Col -->
+
+            <div class="col-6">
+              <!-- Chart -->
+              <div class="chartjs-custom" style="height: 3rem;">
+                Hello
+              </div>
+              <!-- End Chart -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+
+          <span class="badge bg-soft-success text-success">
+            <i class="bi-graph-up"></i> 12.5%
+          </span>
+          <span class="text-body fs-6 ms-1">from 70,104</span>
+        </div>
+      </a>
+      <!-- End Card -->
+    </div>
+
+    <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
+      <!-- Card -->
+      <a class="card card-hover-shadow h-100" href="#">
+        <div class="card-body">
+          <h6 class="card-subtitle">Sessions</h6>
+
+          <div class="row align-items-center gx-2 mb-1">
+            <div class="col-6">
+              <h2 class="card-title text-inherit">29.4%</h2>
+            </div>
+            <!-- End Col -->
+
+            <div class="col-6">
+              <!-- Chart -->
+              <div class="chartjs-custom" style="height: 3rem;">
+                Bello
+              </div>
+              <!-- End Chart -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+
+          <span class="badge bg-soft-success text-success">
+            <i class="bi-graph-up"></i> 1.7%
+          </span>
+          <span class="text-body fs-6 ms-1">from 29.1%</span>
+        </div>
+      </a>
+      <!-- End Card -->
+    </div>
+
+    <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
+      <!-- Card -->
+      <a class="card card-hover-shadow h-100" href="#">
+        <div class="card-body">
+          <h6 class="card-subtitle">Avg. Click Rate</h6>
+
+          <div class="row align-items-center gx-2 mb-1">
+            <div class="col-6">
+              <h2 class="card-title text-inherit">56.8%</h2>
+            </div>
+            <!-- End Col -->
+
+            <div class="col-6">
+              <!-- Chart -->
+              <div class="chartjs-custom" style="height: 3rem;">
+                Cello
+              </div>
+              <!-- End Chart -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+
+          <span class="badge bg-soft-danger text-danger">
+            <i class="bi-graph-down"></i> 4.4%
+          </span>
+          <span class="text-body fs-6 ms-1">from 61.2%</span>
+        </div>
+      </a>
+      <!-- End Card -->
+    </div>
+
+    <div class="col-sm-6 col-lg-3 mb-3 mb-lg-5">
+      <!-- Card -->
+      <a class="card card-hover-shadow h-100" href="#">
+        <div class="card-body">
+          <h6 class="card-subtitle">Pageviews</h6>
+
+          <div class="row align-items-center gx-2 mb-1">
+            <div class="col-6">
+              <h2 class="card-title text-inherit">92,913</h2>
+            </div>
+            <!-- End Col -->
+
+            <div class="col-6">
+              <!-- Chart -->
+              <div class="chartjs-custom" style="height: 3rem;">
+                Dello
+              </div>
+              <!-- End Chart -->
+            </div>
+            <!-- End Col -->
+          </div>
+          <!-- End Row -->
+
+          <span class="badge bg-soft-secondary text-body">0.0%</span>
+          <span class="text-body fs-6 ms-1">from 2,913</span>
+        </div>
+      </a>
+      <!-- End Card -->
+    </div>
+  </div>

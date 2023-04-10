@@ -10,6 +10,9 @@ gunicorn = "*"
 psycopg2 = "*"
 validate-email = "*"
 six = "*"
+numpy = "*"
+django-crispy-forms = "*"
+crispy-bootstrap5 = "*"
 
 [dev-packages]
 
