@@ -2,7 +2,8 @@
 {% load static %}
 {% block content %}
 
-<div class="container">
+<link href="{% static 'css/costing/costing.css'%}" rel="stylesheet">
+<div class="container p=3">
     <h4>Update Job</h4>
     <hr>
     {% if submitted %}
@@ -11,26 +12,89 @@
         <form action="" method="post">
             {% csrf_token %}
             <div class="row">
-                {% for field in basicJobForm %}
-                    <div class="col">
-                        {{field}}
-                    </div>
-                {% endfor %}
-            </div>
-            <div class="row">
                 <div class="col">
-                    Printing
-                    {{printingForm.Printing_Type}}
-                    <div id="dynamicFieldsPrinting">
-                        {{printingDynamicFields.as_p}}
-                        {{inkCost.as_p}}
-                    </div>
-                    
+                    <div class="row align-items-stretch grid-container">
+                    {% for sheet in printing_sheet %}
+                        <div class="col">
+                        <div class="card h-100  border-rounded">
+                            <div class="card-body text-center">
+                                <input type="hidden" name="printingSheetName" value="{{sheet.Printing_Sheet}}">
+                                <h5><b>{{sheet.Printing_Sheet}}</b></h5>
+                                <div class="rate-display" onclick="editRate(this)">
+                                    <h6>{{sheet.Rate}}</h6>
+                                    <input type="" name="printingSheetRate" class="form-control" value="{{sheet.Rate}}" style="display: none;" required>
+                                </div>
+                            </div>
+                        </div>
+                        </div>
+                    {% endfor %}
+                    {% for sheet in lamination_sheet %}
+                        {% if sheet.Lamination_Sheet != 'Met' %}
+                            <div class="col">
+                                <div class="card h-100  border-rounded">
+                                    <div class="card-body text-center">
+                                        <input type="hidden" name="laminationSheetName" value="{{sheet.Lamination_Sheet}}">
+                                        <h5><b>{{sheet.Lamination_Sheet}}</b></h5>
+                                        <div class="rate-display" onclick="editRate(this)">
+                                            <h6>{{sheet.Rate}}</h6>
+                                            <input type="" name="laminationSheetRate" class="form-control" value="{{sheet.Rate}}" style="display: none;" required>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endif %}
+                    {% endfor %}
+                    {% for sheet in miscellaneous %}
+                        <div class="col">
+                            <div class="card h-100  border-rounded">
+                            <div class="card-body text-center">
+                                <input type="hidden" name="miscellaneousType" value="{{sheet.Type}}">
+                                    <h5><b>{{sheet.Type}}</b></h5>
+                                <div class="rate-display" onclick="editRate(this)">
+                                    <h6>{{sheet.Rate}}</h6>
+                                    <input type="" name="miscellaneousRate" class="form-control" value="{{sheet.Rate}}" style="display: none;" required>
+                                </div>
+                            </div>
+                            </div>
+                        </div>
+                    {% endfor %}
                 </div>
+              </div>
+            </div>
+            <div class="row mt-3">
                 <div class="col">
-                    Lamination
-                            {% if laminationTypesList%}
-                                {% for item in laminationTypesList %}
+                    <div class="card w-100 border-rounded">
+                        <div class="card-body">
+                            <div class="row">
+                                {% for field in basicJobForm %}
+                                    <div class="col">
+                                        {{field}}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <div class="row mt-3">
+                <div class="col w-100">
+                    <div class="card h-100 border-rounded">
+                        <div class="card-body">
+                            Printing
+                            {{printingForm.Printing_Type}}
+                            <div id="dynamicFieldsPrinting">
+                                {{printingDynamicFields.as_p}}
+                                {{inkCost.as_p}}
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% if laminationTypesList %}
+                    {% for item in laminationTypesList %}
+                        <div class="col laminationColumn">
+                            <div class="card h-100 border-rounded">
+                                <div class="card-body">
+                                    Lamination
                                     <select name="{{ laminationForm.Lamination_Type.name }}" class="form-control mb-3" id="laminationAlreadyPresent">
                                         <option value="{{ item }}" {% if item == laminationForm.Lamination_Type.value %}selected{% endif %}>
                                             {{ item }}
@@ -46,39 +110,58 @@
                                     <div id="dynamicFieldsLamination{{ forloop.counter }}" data-lamination-type="{{ item }}">
                                         {{ laminationDynamicFields.as_p }}
                                     </div>
-                                {% endfor %}
-                                <div class="dropdown-section" id="dynamicFieldsLamination" style="display: none;">
-                                    {{laminationForm.Lamination_Type}}
-                                    {{laminationDynamicFields.as_p}}
-                                </div>
-                                <a href="#" id="add-dropdown">Add another dropdown</a>
-                            {% else %}
-                                {% block dropdown_section %}
-                                    
-                                    <div class="dropdown-section" id="dynamicFieldsLamination">
+                                    <div class="dropdown-section" id="dynamicFieldsLamination" style="display: none;">
+                                        Lamination
                                         {{laminationForm.Lamination_Type}}
                                         {{laminationDynamicFields.as_p}}
                                     </div>
-                                    <a href="#" id="add-dropdown">Add another dropdown</a>
-                                {% endblock %}
-                        
-                            {% endif %}
-                            
-                            
-                                    
-                </div>
+                                    {% if forloop.last %}
+                                        <a href="#" id="add-dropdown" class="float-right link-color">Add another dropdown</a>
+                                    {% endif %}
+                                </div>
+                            </div>
+                        </div>
+                    {% endfor %}
+                {% else %}
+                    {% block dropdown_section %}
+                        <div class="col laminationColumn">
+                            <div class="card h-100 border-rounded">
+                                <div class="card-body">
+                                    <div class="dropdown-section" id="dynamicFieldsLamination">
+                                        Lamination
+                                        {{laminationForm.Lamination_Type}}
+                                        {{laminationDynamicFields.as_p}}
+                                    </div>
+                                    <a href="#" id="add-dropdown" class="float-right link-color">Add another dropdown</a>
+                                </div>
+                            </div>
+                        </div>
+                    {% endblock %}
             
+                {% endif %}
             </div>
-
-            <div class="row">
-                {% for field in otherElementsForm %}
-                    <div class="col">
-                        {{field}}
+            <div class="row mt-3">
+                <div class="col">
+                    <div class="card w-100 border-rounded">
+                        <div class="card-body">
+                            <div class="row">
+                                {% for field in otherElementsForm %}
+                                    <div class="col">
+                                        {{field}}
+                                    </div>
+                                {% endfor %}
+                            </div>
+                        </div>
                     </div>
-                {% endfor %}
+                </div>
+            </div>
+            <div class="row">
+                <div class="col">
+                    <input type="submit" value="UPDATE" class="btn btn-dark mt-3 float-right w-100">
+                </div>
             </div>
             
-            <input type="submit" value="Submit" class="btn btn-primary">
+            
 
         </form>
         

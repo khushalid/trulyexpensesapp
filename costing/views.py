@@ -2,7 +2,7 @@ from django.shortcuts import render,redirect
 import json 
 import os
 from django.conf import settings
-from .models import Costing
+from .models import *
 from .forms import *
 from django.http import HttpResponseRedirect
 import ast
@@ -11,6 +11,9 @@ from django import forms
 from decimal import Decimal
 from django.forms.models import model_to_dict
 from django.http import JsonResponse
+from django.db.models import F
+from django.core.paginator import Paginator
+
 
 # Create your views here.
 
@@ -19,15 +22,24 @@ def search(request):
     if searchValue:
         jobSearched = Costing.objects.filter(Job_Name__icontains=searchValue)
     else:
-        jobSearched = Costing.objects.all().order_by('-Date')[:10]
+        jobSearched = Costing.objects.all().order_by('-Date')
+
+    paginator = Paginator(jobSearched, 10) # 10 records per page
+    page_number = request.GET.get('page')
+    page_obj = paginator.get_page(page_number)
+
     context = {
-        'jobSearched':jobSearched,
+        'jobSearched':page_obj,
         'search_form': SearchForm()
     }
 
     return render(request, 'costing/search.html', context)
 
 def add(request):
+
+    printing_sheet = Printing.objects.all()
+    lamination_sheet = Lamination.objects.all()
+    miscellaneous = Miscellaneous.objects.all()
     if request.method == 'GET':
         context = {
         'basicJobForm': basicJobElementForm,
@@ -35,17 +47,22 @@ def add(request):
         'laminationForm': laminationForm,
         'otherElementsForm': otherElementForm,
         'printingDynamicFields': printingDynamicFields,
-        'laminationDynamicFields': laminationDynamicFields
+        'laminationDynamicFields': laminationDynamicFields,
+        'printing_sheet': printing_sheet,
+        'lamination_sheet': lamination_sheet,
+        'miscellaneous': miscellaneous
         }
         return render(request, 'costing/add.html',context)
     
     if request.method == 'POST':
         form_value = request.POST.copy()
+        saveSheetRate(form_value)
 
         printing_objects = Printing.objects.all()
         lamination_objects = Lamination.objects.all()
 
         laminationFormValue = form_value.getlist('Lamination_Type')
+        
 
         formOfBasicJobElements = basicJobElementForm(request.POST)
         formOfPrinting = printingForm(request.POST)
@@ -55,8 +72,12 @@ def add(request):
         formOfOtherElements = otherElementForm(request.POST)
 
         costing_instance = saveJobCostData(form_value, formOfBasicJobElements, formOfPrinting, formOfLaminaiton, formOfPrintingDynamicElements, formOfLaminaitonDynamicElements, formOfOtherElements)
-        
         costing_instance.Lamination_Type = str(laminationFormValue)
+        
+        lamination_type_str = costing_instance.Lamination_Type
+        laminationTypesList = None
+        if(lamination_type_str): 
+            laminationTypesList = ast.literal_eval(lamination_type_str) if lamination_type_str != "['']" else []
         
         for printing_object in printing_objects:
             printing_type = printing_object.Printing_Sheet.replace(' ','_') + "_Rate"
@@ -66,11 +87,19 @@ def add(request):
             lamination_type = lamination_object.Lamination_Sheet.replace(' ','_') + "_Rate"
             setattr(costing_instance, lamination_type, lamination_object.Rate)
 
+        
+        costing_instance = calculateCostOfJob(costing_instance, laminationTypesList)
+        print("costing_instance")
+        print(costing_instance)
         costing_instance.save()
         return redirect('/costing')
     
 
 def update_job(request,job_id):
+    printing_sheet = Printing.objects.all()
+    lamination_sheet = Lamination.objects.all()
+    miscellaneous = Miscellaneous.objects.all()
+
     costing = Costing.objects.get(pk=job_id)
 
     lamination_type_str = costing.Lamination_Type
@@ -81,6 +110,18 @@ def update_job(request,job_id):
 
     if request.method == 'POST':
         form_value = request.POST.copy()
+
+        saveSheetRate(form_value)
+        printing_objects = Printing.objects.all()
+        lamination_objects = Lamination.objects.all()
+        for printing_object in printing_objects:
+            printing_type = printing_object.Printing_Sheet.replace(' ','_') + "_Rate"
+            setattr(costing, printing_type, printing_object.Rate)
+
+        for lamination_object in lamination_objects:
+            lamination_type = lamination_object.Lamination_Sheet.replace(' ','_') + "_Rate"
+            setattr(costing, lamination_type, lamination_object.Rate)
+
         for key in form_value.keys():
             form_value.setlist(key, [value for value in form_value.getlist(key) if value])
 
@@ -99,6 +140,7 @@ def update_job(request,job_id):
             formOfPrintingDynamicElements.save()
             formOfLaminaitonDynamicElements.save()
             formOfOtherElements.save()
+            
             costing = calculateCostOfJob(costing, laminationTypesList)
             costing.Lamination_Type = str(laminationFormValue)
             costing.save()
@@ -123,7 +165,10 @@ def update_job(request,job_id):
             'otherElementsForm': formOfOtherElements,
             'printingDynamicFields': formOfPrintingDynamicElements,
             'laminationDynamicFields': formOfLaminaitonDynamicElements,
-            'laminationTypesList': laminationTypesList
+            'laminationTypesList': laminationTypesList,
+            'printing_sheet': printing_sheet,
+            'lamination_sheet': lamination_sheet,
+            'miscellaneous': miscellaneous
         }
         return render(request, 'costing/update.html', context)
 
@@ -205,8 +250,7 @@ def calculateCostOfJob(costing_instance, laminationType):
 
     costing_instance.Coating_Cost_PKG = divide(costing_instance.Coating_Cost,costing_instance.Lamination_Output)
 
-    costing_instance.Zipper_Rate = 179
-    costing_instance.Zipper_Cost = multiply([costing_instance.Zipper_Qty, costing_instance.Zipper_Rate])
+    costing_instance.Zipper_Cost = float(multiply([costing_instance.Zipper_Qty, costing_instance.Zipper_Rate]))
 
     totalCostParameters = [costing_instance.Pet_Cost , costing_instance.Pet_HST_Cost , costing_instance.Ink_Cost , costing_instance.Poly_Cost, costing_instance.Met_Cost , costing_instance.Met_CPP_Cost , costing_instance.Foil_9_Mic_Cost , costing_instance.Foil_30_Mic_Cost , costing_instance.Lamination_Cost , costing_instance.Lamination_Cost_Polly , costing_instance.Polly_Cost , costing_instance.Coating_Cost , costing_instance.Zipper_Cost]
     costing_instance.Total_Cost = sum(listNoneFilter(totalCostParameters)) if totalCostParameters else None
@@ -243,3 +287,31 @@ def divide(num, denom):
         return Decimal(num)/Decimal(denom)
     else:
         return None
+
+def saveSheetRate(form):
+        printingSheetName = form.getlist('printingSheetName')
+        printingSheetRate = form.getlist('printingSheetRate')
+        laminationSheetName = form.getlist('laminationSheetName')
+        laminationSheetRate = form.getlist('laminationSheetRate')
+        miscellaneousType = form.getlist('miscellaneousType')
+        miscellaneousRate = form.getlist('miscellaneousRate')
+
+        printing_sheet = Printing.objects.filter(Printing_Sheet__in=printingSheetName)
+        lamination_sheet = Lamination.objects.filter(Lamination_Sheet__in=laminationSheetName) | Lamination.objects.filter(Lamination_Sheet__in=printingSheetName)
+        miscellaneous_type = Miscellaneous.objects.filter(Type__in=miscellaneousType)
+
+        for sheet, rate in zip(printingSheetName, printingSheetRate):
+            print("sheet name:")
+            print(sheet)
+            if sheet == 'Met':
+                print("Yes this is Met")
+                printing_sheet.filter(Printing_Sheet=sheet).update(Rate=rate)
+                lamination_sheet.filter(Lamination_Sheet=sheet).update(Rate=rate)
+            else:
+                printing_sheet.filter(Printing_Sheet=sheet).update(Rate=rate)
+
+        for sheet, rate in zip(laminationSheetName, laminationSheetRate):
+            lamination_sheet.filter(Lamination_Sheet=sheet).update(Rate=rate)
+
+        for sheet, rate in zip(miscellaneousType, miscellaneousRate):
+            miscellaneous_type.filter(Type=sheet).update(Rate=rate)

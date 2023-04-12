@@ -21,3 +21,14 @@
 .showPasswordToggle:hover {
   transform: scale(1.2);
 }
+:root {
+  --my-custom-color:black; /* Define a custom color variable */
+}
+main{
+  background-color: black;
+  color: #6c7293;
+}
+.sidebar{
+  background: #191c24;
+  color: #fff3da;
+}

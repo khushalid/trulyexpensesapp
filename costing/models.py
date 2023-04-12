@@ -18,8 +18,14 @@ class Lamination(models.Model):
     Rate = models.DecimalField(max_length=None, default=None, decimal_places=3, max_digits=20, blank=True ,null=True)
 
     def __str__(self) -> str:
-        return str(self.Printing_Sheet) + '\'s ' + 'rate is: ' + str(self.Rate)   
+        return str(self.Lamination_Sheet) + '\'s ' + 'rate is: ' + str(self.Rate)  
 
+class Miscellaneous(models.Model):
+    Type = models.CharField(max_length=255, null=True)
+    Rate = models.DecimalField(max_length=None, default=None, decimal_places=3, max_digits=20, blank=True ,null=True)
+
+    def __str__(self) -> str:
+        return str(self.Type) + '\'s ' + 'rate is: ' + str(self.Rate)  
 
 class Costing(models.Model):
     Date = models.DateTimeField()
@@ -81,7 +87,7 @@ class Costing(models.Model):
         return ''
     
     def __str__(self) -> str:
-        return self
+        return str(vars(self))
     
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

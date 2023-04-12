@@ -87,8 +87,6 @@ document.querySelector('#add-dropdown').addEventListener('click', function(event
 
 //     // Clone the dropdown section
     var newDropdownSection = dropdownSection.cloneNode(true);
-    console.log(dropdownSection)
-    console.log(newDropdownSection)
 
 //     // Hide the fields for the cloned section
     hideDynamicField(newDropdownSection, '.lamination-dynamic-fields')
@@ -100,10 +98,34 @@ document.querySelector('#add-dropdown').addEventListener('click', function(event
     // newDropdownSection.id = 'dropdown-section-' + counter;
     newDropdownSection.classList.add('dropdown-section-' + counter);
     
-//     // Append the clone after the last dropdown section
-    document.querySelector('.dropdown-section:last-of-type').after(newDropdownSection);
+    var newColumn = document.createElement('div');
+    newColumn.classList.add('col', 'laminationColumn');
+    
+    var lastColumn = document.querySelector('.laminationColumn:last-of-type');
 
-     var newDropdown = newDropdownSection.querySelector('.Lamination_Type');  
+    // Create a new card
+    var newCard = document.createElement('div');
+    newCard.classList.add('card','h-100', 'border-rounded');
+    
+    // Create a new card body
+    var newCardBody = document.createElement('div');
+    newCardBody.classList.add('card-body');
+
+    var link = document.querySelector('#add-dropdown');
+
+    newCardBody.appendChild(newDropdownSection);
+    newCardBody.appendChild(link);
+
+    // Append the new card body to the new card
+    newCard.appendChild(newCardBody);
+
+    // Append the new card to the new column
+    newColumn.appendChild(newCard);
+
+    // Insert the new column after the last column
+    lastColumn.after(newColumn);
+
+    var newDropdown = newDropdownSection.querySelector('.Lamination_Type');  
 
     // hideDynamicField('.lamination-dynamic-fields')
     newDropdown.addEventListener('change', function() {
@@ -238,4 +260,70 @@ document.querySelector('#add-dropdown').addEventListener('click', function(event
 
 
 
+// const cards = document.querySelectorAll('.card');
+    
+//     cards.forEach((card) => {
+//         const rateDisplay = card.querySelector('.rate-display');
+//         const rateForm = card.querySelector('.rate-form');
+        
+//         card.addEventListener('click', () => {
+//             if (rateDisplay.classList.contains('d-none')) {
+//                 rateDisplay.classList.remove('d-none');
+//                 rateForm.classList.add('d-none');
+//             } else {
+//                 rateDisplay.classList.add('d-none');
+//                 rateForm.classList.remove('d-none');
+//             }
+//         });
+        
+//         rateForm.addEventListener('submit', (event) => {
+//             event.preventDefault();
+            
+//             const formData = new FormData(rateForm);
+//             const rate = formData.get('rate');
+            
+//             const xhr = new XMLHttpRequest();
+//             xhr.open('POST', '/update_rate');
+//             xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+//             xhr.onload = function() {
+//                 if (xhr.status === 200) {
+//                     rateDisplay.querySelector('h6').textContent = rate;
+//                     rateDisplay.classList.remove('d-none');
+//                     rateForm.classList.add('d-none');
+//                 } else {
+//                     console.error(xhr.responseText);
+//                 }
+//             };
+//             xhr.send('rate=' + rate);
+//         });
+//     });
 
+function editRate(rateDisplay) {
+    const h6 = rateDisplay.querySelector('h6');
+    const input = rateDisplay.querySelector('input');
+    
+    if (h6.style.display === 'none') {
+        h6.textContent = input.value;
+        h6.style.display = 'block';
+        input.style.display = 'none';
+    } else {
+        h6.style.display = 'none';
+        input.style.display = 'block';
+        input.focus();
+    }
+}
+
+document.addEventListener('click', function(event) {
+    const rateInputs = document.querySelectorAll('.rate-display input');
+    rateInputs.forEach(rateInput => {
+        if (rateInput && !event.target.closest('.rate-display')) {
+            const rateDisplay = rateInput.closest('.rate-display');
+            const h6 = rateDisplay.querySelector('h6');
+            
+            h6.textContent = rateInput.value;
+            h6.style.display = 'block';
+            rateInput.style.display = 'none';
+        }
+    });
+    
+});

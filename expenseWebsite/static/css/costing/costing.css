@@ -1,0 +1,29 @@
+:root {
+    --my-custom-color: ; /* Define a custom color variable */
+  }
+.border-rounded {
+    border-radius: 20px; /* adjust the value to change the amount of curvature */
+    background-color: #191c24;
+  }
+.form-control {
+    background-color: black;
+    border: none;
+  }
+.link-color {
+  color: #6c7293;
+}
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(110px, 1fr));
+}
+.active-page{
+  background-color: transparent;
+  border-color: transparent;
+  color: #6c7293;
+}
+
+.pagination .page-item.active .page-link {
+  background-color: transparent;
+  border-color: transparent;
+  color: #fff; /* change this to your desired color */
+}
