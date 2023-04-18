@@ -22,13 +22,13 @@
   transform: scale(1.2);
 }
 :root {
-  --my-custom-color:black; /* Define a custom color variable */
+  --my-custom-color:#dcdfe1; /* Define a custom color variable */
 }
 main{
-  background-color: black;
+  background-color: #f2f2f2;
   color: #6c7293;
 }
 .sidebar{
-  background: #191c24;
+  background: #73879C;
   color: #fff3da;
 }

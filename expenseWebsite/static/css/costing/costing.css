@@ -1,12 +1,14 @@
 :root {
     --my-custom-color: ; /* Define a custom color variable */
   }
-.border-rounded {
+  .border-rounded {
     border-radius: 20px; /* adjust the value to change the amount of curvature */
-    background-color: #191c24;
+    background-color: whitesmoke;
+    border: none;
+    box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 1px 6px 0 rgba(0, 0, 0, 0.19);
   }
 .form-control {
-    background-color: black;
+    background-color: #eceef0;
     border: none;
   }
 .link-color {
@@ -25,5 +27,5 @@
 .pagination .page-item.active .page-link {
   background-color: transparent;
   border-color: transparent;
-  color: #fff; /* change this to your desired color */
+  color: #38d0b2; /* change this to your desired color */
 }

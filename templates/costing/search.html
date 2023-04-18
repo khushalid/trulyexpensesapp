@@ -4,7 +4,7 @@
 
 <link href="{% static 'css/costing/costing.css'%}" rel="stylesheet">
 <div class="container mt-2">
-    <h4>Search Job</h4>
+    <h3><b>Search Job</b></h3>
     <hr>
     <form id="myForm" method="get" action="{% url 'search' %}">
         <div class="card border-rounded">
@@ -25,9 +25,10 @@
                                 <tr><b>
                                     <td><b>Job Name</b></td>
                                     <td><b>Job Size</b></td>
-                                    <td><b>Date</b></td>
-                                    <td><b>Update</b></td>
-                                    <td><b>Total Cost</b></td>
+                                    <td style="text-align: center;"><b>Date</b></td>
+                                    <td style="text-align: center;"><b>Lamination Cost PKG</b></td>
+                                    <td style="text-align: center;"><b>Total Cost</b></td>
+                                    <td style="text-align: center;"><b>Update</b></td>
                                 </b></tr>
                             </thead>
                             
@@ -35,13 +36,16 @@
                                     <tr>
                                         <td>{{object.Job_Name}}</td>
                                         <td>{{object.Job_Size}}</td>
-                                        <td>{{object.Date|date:'d M Y'}}</td>
-                                        <td align="left">
+                                        <td style="text-align: center;">{{object.Date|date:'d M Y'}}</td>
+                                        <td style="text-align: center;">{{object.Lamination_Cost_PKG_Polly}}</a>
+                                        </td>
+                                        <td style="text-align: center;">
+                                            <a class="link-color" href="{% url 'tota_cost' object.id%}">{{object.Total_Cost_PKG}}</a>
+                                        </td>
+                                        <td style="text-align: center;">
                                             <a class="link-color" href="{% url 'update_job' object.id%}">Update</a>
                                         </td>
-                                        <td align="left">
-                                            <a class="link-color" href="{% url 'tota_cost' object.id%}">Total Cost</a>
-                                        </td>
+                                        
                                     </tr>
                                         <!-- Update Button -->
                                         <!-- Get Cost Button -->

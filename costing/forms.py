@@ -15,7 +15,7 @@ class basicJobElementForm(forms.ModelForm):
         model = Costing
         fields = ['Date', 'Job_Name', 'Job_Size']
         widgets = {
-            'Date': forms.DateInput(attrs={'class': 'form-control mb-3', 'placeholder':'Date', 'type': 'datetime-local'}),
+            'Date': forms.DateInput(attrs={'class': 'form-control mb-3', 'placeholder':'Date', 'type': 'datetime-local'}, format='%Y-%m-%dT%H:%M:%S'),
             'Job_Name': forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'Job Name'}),
             'Job_Size': forms.TextInput(attrs={'class': 'form-control mb-3', 'placeholder':'Job Size'}),  
         }
@@ -24,8 +24,10 @@ class basicJobElementForm(forms.ModelForm):
         cleaned_data = super().clean()
         date = cleaned_data.get('Date')
         if not date:
+            print("Hello from forms.py 1")
             cleaned_data['Date'] = timezone.now().strftime('%Y-%m-%dT%H:%M:%S')
         else:
+            print("Hello from forms.py 2")
             cleaned_data['Date'] = date.strftime('%Y-%m-%dT%H:%M:%S')
         return cleaned_data
     
@@ -34,8 +36,7 @@ class basicJobElementForm(forms.ModelForm):
         if not self.instance.pk:
             self.fields['Date'].initial = timezone.now().strftime('%Y-%m-%dT%H:%M:%S')
         else:
-            print(self.instance.Date)
-            self.fields['Date'].initial = self.instance.Date
+            self.fields['Date'].initial = self.instance.Date.strftime('%Y-%m-%dT%H:%M:%S')
         for field in self.fields.values():
             field.required = False
 

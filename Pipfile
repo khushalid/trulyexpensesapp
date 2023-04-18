@@ -13,6 +13,7 @@ six = "*"
 numpy = "*"
 django-crispy-forms = "*"
 crispy-bootstrap5 = "*"
+django-sslserver = "*"
 
 [dev-packages]
 

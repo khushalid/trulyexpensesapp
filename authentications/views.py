@@ -36,7 +36,6 @@ class RegisterView(View):
         print("users: ", User.objects.values())
 
         # delete all users at once
-        User.objects.all().delete()
         print("users: ", User.objects.values())
         username = request.POST['username']
         email = request.POST['email']
@@ -76,9 +75,9 @@ class RegisterView(View):
                 )
                 email.send(fail_silently=False)
                 messages.success(request, "User created successfully")
-                return render(request, 'authentication/register.html')
+                return render(request, 'authentication/login.html')
             
-        return render(request, 'authentication/register.html')
+        return render(request, 'authentication/login.html')
 
 class VerificationView(View):
     def get(self, request, uidb64, token):

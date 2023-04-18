@@ -20,5 +20,5 @@ urlpatterns = [
     path('authentication/', include('authentications.urls')),
     path('admin/', admin.site.urls),
     path('costing/', include('costing.urls')),
-    path('monthly_cost/')
+    path('monthly_cost/', include('monthlyCost.urls'))
 ]
