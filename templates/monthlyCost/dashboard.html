@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% load static %}
+{% block content %}
+
+<link href="{% static 'css/monthlyCost/monthlyCost.css'%}" rel="stylesheet">
+<div class="container">
+    <h3><b>Monthly Dashboard</b></h3>
+    <hr>
+    <div class="tab-container">
+        <div class="tab-header">
+        </div>
+        <div class="row tab-content">
+
+        </div>
+    </div>
+    <div class="row monthly-tags p-3 grid-container">
+    </div>
+    <div class="row monthly-qty  p-3 grid-container-qty-tags align-items-center">
+
+    </div>
+    
+    
+</div>
+<script src="{% static 'js/monthlyCost/monthlyCost.js' %}"></script>
+{% endblock %}

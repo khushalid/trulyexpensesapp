@@ -76,7 +76,7 @@
    line-height: 1.5;
    color: #373a3c;
    text-align: left;
-   background-color: black;
+   background-color: #f2f2f2;
  }
  [tabindex="-1"]:focus:not(:focus-visible) {
    outline: 0 !important;
@@ -363,7 +363,7 @@
  }
  h6,
  .h6 {
-   font-size: 0.9375rem;
+   font-size: 1.1rem;
  }
  .lead {
    font-size: 1.171875rem;
@@ -1835,16 +1835,16 @@
  .table td {
    padding: 0.75rem;
    vertical-align: top;
-   border-top: 1px solid #2c2e33;
-   color: #6c7293;
+   border-top: 1px solid #dee2e6;
+   color: #73879C;
  }
  .table thead th {
    vertical-align: bottom;
-   border-bottom: 2px solid #2c2e33;
+   border-bottom: 1px solid #dee2e6;
    border-top: none;
  }
  .table tbody + tbody {
-   border-top: 2px solid #2c2e33;
+   border-top: 2px solid #dee2e6;
  }
  .table-sm th,
  .table-sm td {
@@ -2121,7 +2121,7 @@
    font-weight: 400;
    line-height: 1.5;
    color: #495057;
-   background-color: black;
+   background-color: #aeb1b3;
    background-clip: padding-box;
    border: 1px solid #ced4da;
    border-radius: 0;
@@ -2149,8 +2149,8 @@
  }
  .form-control:focus {
    color: #495057;
-   background-color: black;
-   border-color: #98c2f2;
+   background-color: #eceef0;
+   border-color: none;
    outline: 0;
    -webkit-box-shadow: 0 0 0 0.2rem rgba(39, 128, 227, 0.25);
    box-shadow: 0 0 0 0.2rem rgba(39, 128, 227, 0.25);
@@ -2916,8 +2916,8 @@
  }
  .btn-dark {
    color: #fff;
-   background-color: #373a3c;
-   border-color: #373a3c;
+   background-color: #6c757d;
+   border-color: #6c757d;
  }
  .btn-dark:hover {
    color: #fff;

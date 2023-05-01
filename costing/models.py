@@ -95,7 +95,7 @@ class Costing(models.Model):
 
     def save(self, *args, **kwargs):
         if not self.pk:
-            self.Date = timezone.now().strftime('%Y-%m-%dT%H:%M:%S')
-        elif self.Date is not None:
-            self.Date = self.original_date
+            self.original_date = timezone.now().strftime('%Y-%m-%dT%H:%M:%S')
+        elif self.Date != self.original_date:
+            self.original_date = self.Date
         super().save(*args, **kwargs)

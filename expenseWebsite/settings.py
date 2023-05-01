@@ -42,9 +42,8 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'crispy_forms',
     'crispy_bootstrap5',
-    'expenses',
-    'userPreferences',
-    'costing'
+    'costing',
+    'sslserver',
 ]
 
 MIDDLEWARE = [
@@ -149,3 +148,6 @@ EMAIL_USE_TLS = True
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL')
 EMAIL_PORT = 587
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD')
+
+SSL_CERTIFICATE = '/Users/khushalidaga/.local/share/virtualenvs/expenseWebsite-K-rdj-81/lib/python3.11/site-packages/sslserver/certs/development.crt'
+SSL_PRIVATE_KEY = '/Users/khushalidaga/.local/share/virtualenvs/expenseWebsite-K-rdj-81/lib/python3.11/site-packages/sslserver/certs/development.key'

@@ -1,0 +1,79 @@
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(60px, 70px));
+  overflow-x: auto;
+  width: 100%;
+  box-shadow: none;
+  border-radius: 0px
+}
+
+.grid-container-qty-tags{
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(1px, 200px));
+  overflow-x: auto;
+  width: 100%;
+  grid-gap: 10px;
+}
+.border-rounded {
+  border-radius: 20px; /* adjust the value to change the amount of curvature */
+  background-color: whitesmoke;
+  border: none;
+  box-shadow: 0 1px 1px 0 rgba(0, 0, 0, 0.2), 0 1px 6px 0 rgba(0, 0, 0, 0.19);
+}
+.active-tag-monthYear{
+  background-color: #6c757d;
+  color: white;
+}
+
+
+
+
+
+
+/* delete */
+.tab-container {
+  display: flex;
+  flex-direction: column;
+}
+
+.tab-header {
+  display: flex;
+}
+
+.tab-button {
+  flex: 1;
+  padding: 10px 20px;
+  border: none;
+  background-color: #eee;
+  cursor: pointer;
+  border-radius: 4px 4px 0 0;
+}
+
+.tab-button.active {
+  background-color: #fff;
+  border-bottom: 1px solid #fff;
+}
+
+.tab-content {
+  margin-top: 30px;
+  flex-direction: row;
+  flex-wrap: wrap;
+  display: flex;
+  justify-content: space-between;
+}
+
+.tab-pane {
+  margin-top: 10px;
+  padding: 3px;
+  height: 160px;
+  width: 160px;
+  justify-content: center;
+  align-items: center;
+  flex: 0 0 calc(33.33% - 20px);
+  margin-bottom: 20px;
+
+}
+
+.tab-pane.active {
+  display: block;
+}

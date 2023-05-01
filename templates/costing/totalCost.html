@@ -1,7 +1,29 @@
 {% extends 'base.html' %}
 {% block content %}
 <div class="container">
-    <h1>{{calculated_cost.Job_Name}}</h1>
-    <h1>{{calculated_cost.Total_Cost_PKG}}</h1>
-</div>
+    <h1>{{ calculated_cost.Job_Name }}</h1>
+    <table>
+      <tr>
+        <th>Job ID:</th>
+        <td>{{ calculated_cost.pk }}</td>
+      </tr>
+      <tr>
+        <th>Job Name:</th>
+        <td>{{ calculated_cost.Job_Name }}</td>
+      </tr>
+      <tr>
+        <th>Total Cost PKG:</th>
+        <td>{{ calculated_cost.Total_Cost_PKG }}</td>
+      </tr>
+      <tr>
+        <th>Cost Category:</th>
+        <td>{{ calculated_cost.Cost_Category }}</td>
+      </tr>
+      <tr>
+        <th>Description:</th>
+        <td>{{ calculated_cost.Description }}</td>
+      </tr>
+      <!-- add more rows as needed for other fields -->
+    </table>
+  </div>
 {% endblock %}
